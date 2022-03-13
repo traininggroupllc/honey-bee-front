@@ -26,13 +26,13 @@ const Navbar = () => {
               </Link>
             </div>
             <div className='web-nav'>
-              <Link to='/' className='mx-2'>Home</Link>
-              <Link to='/beehive' className='mx-2'>Beehive</Link>
-              <Link to='/honeyjar' className='mx-2'>Honey Jar</Link>
-              <Link to='/metamorphosis' className='mx-2'>Metamorphosis</Link>
-              <Link to='/tokenomics' className='mx-2'>Tokenomics</Link>
-              <Link to='/roadmap' className='mx-2'>Roadmap</Link>
-              <button className='btn btn-sm text-warning mx-2'>Connect Wallet</button>
+              <Link to='/' className='mx-3'>Home</Link>
+              <Link to='/beehive' className='mx-3'>Beehive</Link>
+              <Link to='/honeyjar' className='mx-3'>Honey Jar</Link>
+              <Link to='/metamorphosis' className='mx-3'>Metamorphosis</Link>
+              <Link to='/tokenomics' className='mx-3'>Tokenomics</Link>
+              <Link to='/roadmap' className='mx-3'>Roadmap</Link>
+              <button className='btn btn-sm text-warning mx-3'>Connect Wallet</button>
             </div>
             <div className='mobile-nav'>
               <div className='dropdown'>

@@ -127,7 +127,7 @@ const Landing = () => {
       counter++
       counter = counter % 7
       await setCurrentImage(bees[counter].image)
-    }, 700)
+    }, 500)
   }, [])
 
   return (
