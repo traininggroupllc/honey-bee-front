@@ -183,7 +183,7 @@ const Landing = () => {
         </div>
       </div>
       <div className='landing-3 container-fluid'>
-        <div className='h3 font-weight-bold text-center py-4'>Meet The Hardest Working Bees in the Hive</div>
+        <div className='h3 font-weight-bold text-center py-5'>Meet The Hardest Working Bees in the Hive</div>
         <div className='row'>
           <div className='col-lg-3'></div>
           <div className='col-lg-6 text-center'>
