@@ -43,6 +43,13 @@ body {
   color: #FFBD22;
   font-weight: 700;
 }
+.black-btn:hover {
+  color: #FFBD22;
+}
+
+.mint-controller:hover {
+  cursor: pointer;
+}
 
 .yellow-btn {
   background: #FFBD22;
@@ -131,7 +138,11 @@ body {
   font-size: 24px !important;
   font-weight: 700 !important;
   font-style: normal;
-  line-height: 20px;
+  line-height: 32px;
+}
+
+.season-slogan {
+  line-height: 0;
 }
 
 @media (max-width: 769px) {

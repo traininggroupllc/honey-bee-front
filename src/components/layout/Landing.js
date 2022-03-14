@@ -121,6 +121,8 @@ var counter = 0
 const Landing = () => {
 
   const [currentImage, setCurrentImage] = React.useState(bees[0].image)
+  const [mintAmount, setMintAmount] = React.useState(1)
+  const nftPrice = 255
 
   React.useEffect(() => {
     setInterval(async function () {
@@ -129,6 +131,14 @@ const Landing = () => {
       await setCurrentImage(bees[counter].image)
     }, 500)
   }, [])
+
+  const updateMintAmount = (offset) => {
+    if (mintAmount + offset > 0) {
+      setMintAmount(mintAmount + offset)
+    } else {
+      setMintAmount(1)
+    }
+  }
 
   return (
     <div className='landing'>
@@ -143,19 +153,19 @@ const Landing = () => {
             </div>
             <div className='d-flex align-items-center justify-content-between'>
               <div>
-                <img alt='SETIMAGE' src={minusButton} className='img-fluid' />
+                <img alt='SETIMAGE' src={minusButton} className='img-fluid mint-controller' onClick={() => updateMintAmount(-1)} />
               </div>
               <div>
                 <img alt='SETIMAGE' src={currentImage} className='img-fluid hero-dynamic-img' />
               </div>
               <div>
-                <img alt='SETIMAGE' src={plusButton} className='img-fluid' />
+                <img alt='SETIMAGE' src={plusButton} className='img-fluid mint-controller' onClick={() => updateMintAmount(1)} />
               </div>
             </div>
             <div className='text-center bg-yellow mint-box p-3'>
-              <div className='h4'>Mint 1 Honey Bee NFT.</div>
-              <div className='h4'>255 MATIC Each.</div>
-              <div className='h3 font-weight-bold py-2'>Total: 255 MATIC</div>
+              <div className='h4'>Mint {mintAmount} Honey Bee NFT.</div>
+              <div className='h4'>{nftPrice} MATIC Each.</div>
+              <div className='h3 font-weight-bold py-2'>Total: {mintAmount * nftPrice} MATIC</div>
               <div><button className='black-btn btn px-4 h4 py-2'>Mint</button></div>
             </div>
           </div>
@@ -186,7 +196,7 @@ const Landing = () => {
         <div className='h3 font-weight-bold text-center py-5'>Meet The Hardest Working Bees in the Hive</div>
         <div className='row'>
           <div className='col-lg-3'></div>
-          <div className='col-lg-6 text-center'>
+          <div className='col-lg-6 text-center pb-5'>
             {bees.map((item, index) =>
               <div key={index} className='d-inline-block text-center p-1'>
                 <img alt='SETIMAGE' src={item.image} className='img-fluid' />
