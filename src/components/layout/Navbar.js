@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom'
 import tweeter from '../../img/tweeter.png'
 import discord from '../../img/discord.png'
 import logo from '../../img/logo.png'
+import WalletConnect from './WalletConnect'
 
-const Navbar = () => {
+function Navbar() {
   return (
     <div className='top-navbar'>
       <div className='bg-top'>
@@ -32,7 +33,7 @@ const Navbar = () => {
               <Link to='/metamorphosis' className='mx-3'>Metamorphosis</Link>
               <Link to='/tokenomics' className='mx-3'>Tokenomics</Link>
               <Link to='/roadmap' className='mx-3'>Roadmap</Link>
-              <button className='btn btn-sm text-warning mx-3'>Connect Wallet</button>
+              <WalletConnect />
             </div>
             <div className='mobile-nav'>
               <div className='dropdown'>
@@ -46,7 +47,9 @@ const Navbar = () => {
                   <p className="dropdown-item"><Link to='/metamorphosis' className='mx-2'>Metamorphosis</Link></p>
                   <p className="dropdown-item"><Link to='/tokenomics' className='mx-2'>Tokenomics</Link></p>
                   <p className="dropdown-item"><Link to='/roadmap' className='mx-2'>Roadmap</Link></p>
-                  <p className="dropdown-item"><button className='btn btn-sm bg-yellow text-dark mx-2'>Connect Wallet</button></p>
+                  <p className="dropdown-item">
+                    <WalletConnect />
+                  </p>
                 </div>
               </div>
             </div>

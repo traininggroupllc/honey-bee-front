@@ -224,7 +224,7 @@ const Landing = () => {
             <div><span className='font-weight-bold'>Other NFT Projects </span>= 100% of mint funds + 100% of royalties go into devs wallet</div>
             <br />
             <div><span className='font-weight-bold'>Bee City NFTs </span>= 70% of mint funds + 100% of royalties go into the LP (Honey Jar)</div>
-            <div><span className='font-weight-bold'>Bee City NFTs </span>= 20% of mint funds + 0% of royalties go into devs wallet</div>
+            <div><span className='font-weight-bold'>Bee City NFTs </span>= 30% of mint funds + 0% of royalties go into devs wallet</div>
           </div>
           <div className='col-md-2'></div>
         </div>
