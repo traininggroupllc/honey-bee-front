@@ -61,6 +61,7 @@ function MetamaskConnect() {
                 // setMessage(messages =>[...messages, {head : "User Rejected Request", body: 'Please connect to MetaMask.', variant: 'info'}])
             } else if(err.code === -32002) {
                 console.log('Please unlock MetaMask.')
+                alert('Please unlock MetaMask.')
                 // setMessage(messages =>[...messages, {head : "User Request Pending", body: 'Please unlock MetaMask and try agin.', variant: 'info'}])
             } else if(err.code === 4902 || err.code === -32603) {
                 addNetwork("polygon");
@@ -89,7 +90,7 @@ function MetamaskConnect() {
         console.log('here', _chainId);
         setCurrentChainID(() => parseInt(_chainId, 16))
         //window.location.reload()
-        connect()
+        // connect()
     }
 
 
