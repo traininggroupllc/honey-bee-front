@@ -3,7 +3,7 @@ import Web3 from 'web3'
 import detectEthereumProvider from '@metamask/detect-provider';
 import { useEffect, useState } from 'react'
 
-function WalletConnect() {
+function MetamaskConnect() {
     const networks = {
         'polygon': {
             chainId: '0x89',
@@ -25,14 +25,17 @@ function WalletConnect() {
     const connect = async () => {
         //Detect Provider
         const provider = await detectEthereumProvider()
-        const web3 = new Web3(provider)
+        console.log('provider', provider)
+        // const web3 = new Web3(provider)
 
-        if(!provider) {
-        setMessage(messages => [...messages, {head : "Wallet not found", body: `Please install MetaMask!`, variant: 'warning'}])
+        if(!provider || provider == null) {
+            alert('Please install MetaMask!')
+            window.open('https://metamask.io/', '_blank');
+            // setMessage(messages => [...messages, {head : "Wallet not found", body: `Please install MetaMask!`, variant: 'warning'}])
         } else {
-        const address = await ConnectWallet()
-        if (address)
-            setMessage(messages =>[...messages, {head : "User Login", body: `addres: ${address}`, variant: 'success'}])
+            const address = await ConnectWallet()
+            if (address)
+                setMessage(messages =>[...messages, {head : "User Login", body: `addres: ${address}`, variant: 'success'}])
         }
     }
 
@@ -55,10 +58,11 @@ function WalletConnect() {
             } catch(err) {
             if (err.code === 4001) {
                 console.log('Please connect to MetaMask.')
-                setMessage(messages =>[...messages, {head : "User Rejected Request", body: 'Please connect to MetaMask.', variant: 'info'}])
+                // setMessage(messages =>[...messages, {head : "User Rejected Request", body: 'Please connect to MetaMask.', variant: 'info'}])
             } else if(err.code === -32002) {
                 console.log('Please unlock MetaMask.')
-                setMessage(messages =>[...messages, {head : "User Request Pending", body: 'Please unlock MetaMask and try agin.', variant: 'info'}])
+                alert('Please unlock MetaMask.')
+                // setMessage(messages =>[...messages, {head : "User Request Pending", body: 'Please unlock MetaMask and try agin.', variant: 'info'}])
             } else if(err.code === 4902 || err.code === -32603) {
                 addNetwork("polygon");
             } else {
@@ -82,16 +86,21 @@ function WalletConnect() {
         }
     }
 
+    const chainChanged = (_chainId) => {
+        console.log('here', _chainId);
+        setCurrentChainID(() => parseInt(_chainId, 16))
+        //window.location.reload()
+        // connect()
+    }
+
+
     useEffect(() => {
         window.onbeforeunload = function() { return "Prevent reload" }
-        window.ethereum.on('accountsChanged', handleAccountsChanged);
-
-        window.ethereum.on('chainChanged', (_chainId) => {
-            console.log('here', _chainId);
-            setCurrentChainID(() => parseInt(_chainId, 16))
-            //window.location.reload()
-            connect()
-        });
+        console.log('ethereum', window.ethereum);
+        if (window.ethereum !== undefined) {
+            window.ethereum.on('accountsChanged', handleAccountsChanged);
+            window.ethereum.on('chainChanged', chainChanged);
+        }
     }, []);
 
 
@@ -175,10 +184,10 @@ function WalletConnect() {
   return (
       <>
         {/* <Chain chainId={currentChainID} />{' '} */}
-        <button onClick={connect} disabled={isLogged} className='btn btn-sm text-warning mx-3'>{isLogged ? shortAddr() : "Connect Wallet"}</button>{' '}
+        <button id="connect" onClick={connect} disabled={isLogged} className='btn btn-sm text-warning mx-3'>{isLogged ? shortAddr() : "Connect Wallet"}</button>{' '}
         {/* <button onClick={disconnect} style={{visibility: isLogged ? "visible" : "hidden"}} className='btn btn-sm text-warning mx-3'>X</button> */}
       </>
   )
 }
 
-export default WalletConnect
+export default MetamaskConnect
