@@ -30,7 +30,8 @@ import {
   // HONEYBANK_CONTRACT_ADDRESS,
   // HONEYBANK_CONTRACT_ABI,
   BCITY_CONTRACT_ADDRESS,
-  BCITY_CONTRACT_ABI
+  BCITY_CONTRACT_ABI,
+  NFT_PRICE
 } from '../../config'
 
 const bees = [
@@ -138,8 +139,6 @@ const Landing = () => {
   const [balance, setBalance] = React.useState(0)
   const [currentAccount, setCurrentAccount] = React.useState('')
   const [isMinting, setIsMinting] = React.useState(false)
-
-  const nftPrice = 0.255
   
   const web3 = new Web3(Web3.givenProvider)
   
@@ -186,14 +185,14 @@ const Landing = () => {
     if (currentAccount === '') {
       toast.warning('Please connect to metamask')
     } else {
-      if (balance < mintAmount * nftPrice) {
+      if (balance < mintAmount * NFT_PRICE) {
         toast.warning('Balance is not enough')
       } else {
         setIsMinting(true)
         bcityContract.methods.
         buy(mintAmount).send({
           from: currentAccount,
-          value: mintAmount * nftPrice * 1000000000000000000,
+          value: mintAmount * NFT_PRICE * 1000000000000000000,
           gas: 2100000
         })
         .once("error", (err) => {
@@ -233,8 +232,8 @@ const Landing = () => {
             </div>
             <div className='text-center bg-yellow mint-box p-3'>
               <div className='h4'>Mint {mintAmount} Honey Bee NFT.</div>
-              <div className='h4'>{nftPrice} MATIC Each.</div>
-              <div className='h3 font-weight-bold py-2'>Total: {mintAmount * nftPrice} MATIC</div>
+              <div className='h4'>{NFT_PRICE} MATIC Each.</div>
+              <div className='h3 font-weight-bold py-2'>Total: {mintAmount * NFT_PRICE} MATIC</div>
               <div>
                 <button onClick={mint} className='black-btn btn px-4 h4 py-2'>
                 { isMinting && <Spinner as='span' animation='border' size='sm' role='status' aria-hidden='true' style={{padding: '6px'}}/>}
