@@ -234,3 +234,23 @@ input[type=number] {
     padding-bottom: 30px !important;
   }
 }
+
+.honey-balance {
+  display: inline-flex;
+  float: right;
+  padding: 0.375rem 0.75rem;
+}
+
+.swap-input {
+  width: 70%;
+  text-align: left;
+}
+
+.swap-symbol {
+  width: 30%;
+  text-align: center;
+}
+
+.btn-max {
+  cursor: pointer;
+}
