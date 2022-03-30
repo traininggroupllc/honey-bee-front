@@ -31,8 +31,10 @@ import {
   // HONEYBANK_CONTRACT_ABI,
   BCITY_CONTRACT_ADDRESS,
   BCITY_CONTRACT_ABI,
-  NFT_PRICE
+  NFT_PRICE,
+  CHAIN_ID
 } from '../../config'
+import MetamaskConnect from './MetamaskConnect';
 
 const bees = [
   {
@@ -141,12 +143,9 @@ const Landing = () => {
   const [isMinting, setIsMinting] = React.useState(false)
   
   const web3 = new Web3(Web3.givenProvider)
-  
-  // const hnybContract = new web3.eth.Contract(HNYB_CONTRACT_ABI, HNYB_CONTRACT_ADDRESS)
   const bcityContract = new web3.eth.Contract(BCITY_CONTRACT_ABI, BCITY_CONTRACT_ADDRESS)
-  // const honeyBankContract = new web3.eth.Contract(HONEYBANK_CONTRACT_ABI, HONEYBANK_CONTRACT_ADDRESS)
 
-  React.useEffect(() => {
+  React.useEffect( async () => {
     setInterval(async function () {
       counter++
       counter = counter % 7
@@ -167,21 +166,25 @@ const Landing = () => {
     if (Web3.givenProvider !== null) {
       const web3 = new Web3(Web3.givenProvider)
       const accounts = await web3.eth.getAccounts()
-      if (accounts.length === 0) {
-        setCurrentAccount('')
-      } else {
-        var balance = web3.eth.getBalance(accounts[0])
-        balance.then( result => {
-          balance = web3.utils.fromWei(result)
-          balance = parseFloat(balance)
-          setBalance(balance)
-          setCurrentAccount(accounts[0])
-        })
-      }
+      web3.eth.net.getId()
+      .then((res) => {
+        const chainId = res.toString(16)
+        if (accounts.length === 0 || '0x' + chainId !== CHAIN_ID) {
+          setCurrentAccount('')
+        } else {
+          var balance = web3.eth.getBalance(accounts[0])
+          balance.then( result => {
+            balance = web3.utils.fromWei(result)
+            balance = parseFloat(balance)
+            setBalance(balance)
+            setCurrentAccount(accounts[0])
+          })
+        }
+      });
     }
   }
 
-  const mint = () => {
+  const mint = async () => {
     if (currentAccount === '') {
       toast.warning('Please connect to metamask')
     } else {
@@ -198,7 +201,11 @@ const Landing = () => {
         .once("error", (err) => {
           console.log(err)
           setIsMinting(false)
-          toast.error('Minting failed.')
+          if (err.code === 4001) {
+            toast.error('You canceled confirmation') 
+          } else {
+            toast.error('Minting failed.') 
+          }
         })
         .then(res => {
           setIsMinting(false)
@@ -235,10 +242,14 @@ const Landing = () => {
               <div className='h4'>{NFT_PRICE} MATIC Each.</div>
               <div className='h3 font-weight-bold py-2'>Total: {mintAmount * NFT_PRICE} MATIC</div>
               <div>
-                <button onClick={mint} className='black-btn btn px-4 h4 py-2'>
-                { isMinting && <Spinner as='span' animation='border' size='sm' role='status' aria-hidden='true' style={{padding: '6px'}}/>}
-                &nbsp;Mint
-                </button>
+                { 
+                  currentAccount != '' ?
+                    <button onClick={mint} className='black-btn btn px-4 h4 py-2'>
+                    { isMinting && <Spinner as='span' animation='border' size='sm' role='status' aria-hidden='true' style={{padding: '6px'}}/>}
+                    &nbsp;Mint
+                    </button> :
+                    <MetamaskConnect type='black-btn btn px-4 h4 py-2' handleConnect={loadAccountData} handleDisconnect={loadAccountData}/>
+                }
               </div>
             </div>
           </div>

@@ -11,8 +11,10 @@ import {
   // BCITY_CONTRACT_ADDRESS,
   // BCITY_CONTRACT_ABI,
   BUY_PRICE,
-  SELL_PRICE
+  SELL_PRICE,
+  CHAIN_ID
 } from '../../config'
+import MetamaskConnect from './MetamaskConnect';
 import beeTokenImage from '../../img/honey-token.png'
 import polygonTokenImage from '../../img/polygon-token.png'
 
@@ -32,7 +34,7 @@ const HoneyJar = () => {
   const [matic, setMatic] = React.useState(0)
   const [tab, setTab] = React.useState('buy')
 
-  React.useEffect(() => {
+  React.useEffect(async () => {
     window.onbeforeunload = function() { return "Prevent reload" }
     if (window.ethereum !== undefined) {
         window.ethereum.on('chainChanged', chainChanged);
@@ -43,23 +45,27 @@ const HoneyJar = () => {
   const loadAccountData = async () => {
     if (Web3.givenProvider !== null) {
       const web3 = new Web3(Web3.givenProvider)
-      if (Web3.givenProvider.chainId == '0x13881') {
+      if (Web3.givenProvider.chainId == CHAIN_ID) {
         const accounts = await web3.eth.getAccounts()
-        if (accounts.length === 0) {
-          setCurrentAccount('')
-        } else {
-          setCurrentAccount(accounts[0])
-          var balance = web3.eth.getBalance(accounts[0])
-          balance.then( result => {
-            balance = web3.utils.fromWei(result)
-            balance = parseFloat(balance).toFixed(4)
-            console.log('balance', balance)
-            setMaticBalance(balance)
-            // setMatic(balance)
-          })
-          getHnybBalance(accounts[0])
-          // getMaticBalance(currentAccount)
-        }
+        web3.eth.net.getId()
+        .then((res) => {
+          const chainId = res.toString(16)
+          if (accounts.length === 0 || '0x' + chainId !== CHAIN_ID) {
+            setCurrentAccount('')
+          } else {
+            setCurrentAccount(accounts[0])
+            var balance = web3.eth.getBalance(accounts[0])
+            balance.then( result => {
+              balance = web3.utils.fromWei(result)
+              balance = parseFloat(balance).toFixed(4)
+              console.log('balance', balance)
+              setMaticBalance(balance)
+              // setMatic(balance)
+            })
+            getHnybBalance(accounts[0])
+            // getMaticBalance(currentAccount)
+          }
+        });
       } else {
         console.log('Switch network to polygon')
         switchNetwork()
@@ -133,7 +139,7 @@ const HoneyJar = () => {
     await window.ethereum.request({
       method: 'wallet_switchEthereumChain',
       // params: [{ chainId: '0x89' }], // chainId must be in hexadecimal numbers
-      params: [{ chainId: '0x13881' }], // Test net
+      params: [{ chainId: CHAIN_ID }], // Test net
     });
   }
 
@@ -290,10 +296,14 @@ const HoneyJar = () => {
               }
 
               <div className='mt-5 mb-4'>
-                <button className='btn black-btn px-5' onClick={swap}>
-                  { isSwap && <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true"/>}
-                  &nbsp;Swap
-                </button>
+                { 
+                  currentAccount != '' ?
+                    <button className='btn black-btn px-5' onClick={swap}>
+                    { isSwap && <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true"/>}
+                    &nbsp;Swap
+                    </button> :
+                    <MetamaskConnect type='black-btn btn px-4 h4 py-2' handleConnect={loadAccountData} handleDisconnect={loadAccountData}/>
+                }
               </div>
             </div>
           </div>

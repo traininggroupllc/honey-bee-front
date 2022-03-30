@@ -5,10 +5,10 @@ import detectEthereumProvider from '@metamask/detect-provider';
 import { useEffect, useState } from 'react'
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { NETWORKS } from '../../config';
+import { CHAIN_ID, NETWORKS } from '../../config';
 
 toast.configure()
-function MetamaskConnect() {
+function MetamaskConnect({type, handleConnect, handleDisconnect}) {
     const [currentAccount, setCurrentAccount] = useState('')
     const [isLogged, setIsLogged] = useState(false)
     const [isConnecting, setIsConnecting] = useState(false)
@@ -23,13 +23,23 @@ function MetamaskConnect() {
 
         if(!provider || provider == null) {
             setIsConnecting(false)
-            // toast.warning('Please install metamask')
-            // toast.warning('Please install metamask')
             alert('Please install metamask')
             window.open('https://metamask.io/', '_blank');
         } else {
             const address = await ConnectWallet()
         }
+    }
+
+    const connected = (account) => {
+        setCurrentAccount(account)
+        setIsLogged(true)
+        handleConnect()
+    }
+
+    const disconnected = () => {
+        setIsLogged(false)
+        setCurrentAccount('')
+        handleDisconnect()
     }
 
     const ConnectWallet = async () => {
@@ -40,14 +50,13 @@ function MetamaskConnect() {
             const id = await window.ethereum.request({
                 method: 'wallet_switchEthereumChain',
                 // params: [{ chainId: '0x89' }], // chainId must be in hexadecimal numbers
-                params: [{ chainId: '0x13881' }], // Test net
+                params: [{ chainId: CHAIN_ID }], // Test net
             });
 
             setCurrentChainID(() => parseInt(id, 16))
 
             const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
-                setIsLogged(true)
-                setCurrentAccount(accounts[0])
+                connected(accounts[0])
                 setIsConnecting(false)
                 return accounts[0]
             } catch(err) {
@@ -72,16 +81,18 @@ function MetamaskConnect() {
         // console.log('handleAccountsChanged');
         //if(!isLogged) return
         if (accounts.length === 0) {
-            setIsLogged(false)
-            setCurrentAccount('')
+            disconnected()
         } else if (accounts[0] !== currentAccount) {
-            setCurrentAccount(accounts[0])
-            setIsLogged(true)
+            connected(accounts[0])
         }
     }
 
     const chainChanged = (_chainId) => {
         setCurrentChainID(() => parseInt(_chainId, 16))
+        if (_chainId != CHAIN_ID) {
+            disconnect()
+        }
+        loadAccountData()
         //window.location.reload()
         // connect()
     }
@@ -90,33 +101,35 @@ function MetamaskConnect() {
         if (Web3.givenProvider !== null) {
             const web3 = new Web3(Web3.givenProvider)
             const accounts = await web3.eth.getAccounts()
-            if (accounts.length === 0) {
-              setCurrentAccount('')
-              setIsLogged(false)
-            } else {
-              setCurrentAccount(accounts[0])
-              setIsLogged(true)
-              var balance = web3.eth.getBalance(accounts[0])
-              balance.then( result => {
-                balance = web3.utils.fromWei(result)
-                balance = parseFloat(balance)
-                setBalance(balance)
-              })
-            }
+            web3.eth.net.getId()
+            .then((res) => {
+                const chainId = res.toString(16)
+                if (accounts.length === 0 || '0x' + chainId !== CHAIN_ID) {
+                    disconnected()
+                } else {
+                    connected(accounts[0])
+                    var balance = web3.eth.getBalance(accounts[0])
+                    balance.then( result => {
+                        balance = web3.utils.fromWei(result)
+                        balance = parseFloat(balance)
+                        setBalance(balance)
+                    })
+                }
+            });
         }
     }
 
 
-    useEffect(() => {
+    useEffect( () => {
         window.onbeforeunload = function() { return "Prevent reload" }
         if (window.ethereum !== undefined) {
             window.ethereum.on('accountsChanged', handleAccountsChanged);
             window.ethereum.on('chainChanged', chainChanged);
         }
         loadAccountData()
-    }, []);
+    }, [currentAccount]);
 
-    const disconnect = async () => {
+    const disconnect = () => {
         setIsLogged(false)
         setCurrentAccount('')
     }
@@ -195,16 +208,17 @@ function MetamaskConnect() {
     //     )
     // }
 
-  return (
-      <>
-        {/* <Chain chainId={currentChainID} />{' '} */}
-        <button id="connect" onClick={connect} disabled={isLogged} className='btn btn-sm text-warning mx-3'>
-            { isConnecting && <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true"/>}
-            &nbsp;{isLogged ? shortAddr() : "Connect Wallet"}
-        </button>{' '}
-        {/* <button onClick={disconnect} style={{visibility: isLogged ? "visible" : "hidden"}} className='btn btn-sm text-warning mx-3'>X</button> */}
-      </>
-  )
+    return (
+        <>
+            {/* <Chain chainId={currentChainID} />{' '} */}
+            <button id="connect" onClick={connect} disabled={isLogged} className={type}>
+            {/* <button id="connect" onClick={connect} disabled={isLogged} className='btn btn-sm text-warning mx-3'> */}
+                { isConnecting && <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true"/>}
+                &nbsp;{isLogged ? shortAddr() : "Connect Wallet"}
+            </button>{' '}
+            {/* <button onClick={disconnect} style={{visibility: isLogged ? "visible" : "hidden"}} className='btn btn-sm text-warning mx-3'>X</button> */}
+        </>
+    )
 }
 
 export default MetamaskConnect
