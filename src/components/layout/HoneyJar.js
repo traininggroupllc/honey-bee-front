@@ -52,6 +52,8 @@ const HoneyJar = () => {
           const chainId = res.toString(16)
           if (accounts.length === 0 || '0x' + chainId !== CHAIN_ID) {
             setCurrentAccount('')
+            setMaticBalance(0)
+            setHnybBalance(0)
           } else {
             setCurrentAccount(accounts[0])
             var balance = web3.eth.getBalance(accounts[0])
@@ -153,64 +155,72 @@ const HoneyJar = () => {
   }
 
   const buy = () => {
-    if (matic > 0 && matic <= maticBalance) {
-      honeyBankContract.methods.buy().send({
-        from: currentAccount,
-        value: web3.utils.toWei(matic),
-        gas: 2100000
-      })
-      .then(res => {
-        setIsSwap(false)
-        toast.success('You bought Honey bee successfully')
-        getHnybBalance(currentAccount)
-      })
-      .catch(err => {
-        setIsSwap(false)
-        toast.error('Buy Token failed.')
-      })
+    if (currentAccount === '') {
+      toast.warning('Please connect to metamask')
     } else {
-      setIsSwap(false)
-      toast.warning('Amount is not available')
+      if (matic > 0 && matic <= maticBalance) {
+        honeyBankContract.methods.buy().send({
+          from: currentAccount,
+          value: web3.utils.toWei(matic),
+          gas: 2100000
+        })
+        .then(res => {
+          setIsSwap(false)
+          toast.success('You bought Honey bee successfully')
+          getHnybBalance(currentAccount)
+        })
+        .catch(err => {
+          setIsSwap(false)
+          toast.error('Buy Token failed.')
+        })
+      } else {
+        setIsSwap(false)
+        toast.warning('Amount is not available')
+      }
     }
   }
 
   const sell = () => {
-    if (honey > 0 && honey <= parseFloat(hnybBalance)) {
-      // var hn = parseFloat(web3.utils.toWei(honey));
-      // console.log('formated honey', hn)
-      hnybContract.methods.approve(HONEYBANK_CONTRACT_ADDRESS, web3.utils.toWei(honey)).send({
-        from: currentAccount,
-        gas: 2100000
-      })
-      .then(res => {
-        if (res) {
-          honeyBankContract.methods.sell(web3.utils.toWei(honey)).send({
-            from: currentAccount,
-            gas: 2100000
-          })
-          .then(res => {
+    if (currentAccount === '') {
+      toast.warning('Please connect to metamask')
+    } else {
+      if (honey > 0 && honey <= parseFloat(hnybBalance)) {
+        // var hn = parseFloat(web3.utils.toWei(honey));
+        // console.log('formated honey', hn)
+        hnybContract.methods.approve(HONEYBANK_CONTRACT_ADDRESS, web3.utils.toWei(honey)).send({
+          from: currentAccount,
+          gas: 2100000
+        })
+        .then(res => {
+          if (res) {
+            honeyBankContract.methods.sell(web3.utils.toWei(honey)).send({
+              from: currentAccount,
+              gas: 2100000
+            })
+            .then(res => {
+              setIsSwap(false)
+              toast.success('You sold Honey bee successfully')
+              getHnybBalance(currentAccount)
+            })
+            .catch(err => {
+              console.log('err', err);
+              setIsSwap(false)
+              toast.error('Sell Token failed.')
+            })
+          } else {
             setIsSwap(false)
-            toast.success('You sold Honey bee successfully')
-            getHnybBalance(currentAccount)
-          })
-          .catch(err => {
-            console.log('err', err);
-            setIsSwap(false)
-            toast.error('Sell Token failed.')
-          })
-        } else {
+            toast.error('Not approved to transfer')
+          }
+        })
+        .catch(err => {
+          console.log('err', err);
           setIsSwap(false)
           toast.error('Not approved to transfer')
-        }
-      })
-      .catch(err => {
-        console.log('err', err);
+        })
+      } else {
         setIsSwap(false)
-        toast.error('Not approved to transfer')
-      })
-    } else {
-      setIsSwap(false)
-      toast.warning('Amount is not available')
+        toast.warning('Amount is not available')
+      }
     }
   }
 
@@ -302,7 +312,7 @@ const HoneyJar = () => {
                     { isSwap && <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true"/>}
                     &nbsp;Swap
                     </button> :
-                    <MetamaskConnect type='black-btn btn px-4 h4 py-2' handleConnect={loadAccountData} handleDisconnect={loadAccountData}/>
+                    <MetamaskConnect type='btn black-btn px-5' handleConnect={loadAccountData} handleDisconnect={loadAccountData}/>
                 }
               </div>
             </div>

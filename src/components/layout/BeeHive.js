@@ -179,7 +179,8 @@ const BeeHive = () => {
         image: image,
         name: web3.utils.fromWei(res.honeyPerDay) + ' ' + SYMBOL,
         tokenId: token,
-        lastCollect: lastCollect
+        lastCollect: lastCollect,
+        honeyPerDay: parseInt(web3.utils.fromWei(res.honeyPerDay))
       }
       tempBees.push(bee)
       
@@ -188,6 +189,15 @@ const BeeHive = () => {
         setLoadCount(tempLoadCount)
       }
       if (tempLoadCount == tempBalance) {
+        for (var j = 0; j < tempBees.length; j++){
+          for(var k = j + 1; k < tempBees.length; k++){
+            if (tempBees[j].honeyPerDay > tempBees[k].honeyPerDay) {
+              var temp = tempBees[j]
+              tempBees[j] = tempBees[k]
+              tempBees[k] = temp
+            }
+          }
+        }
         setBees(tempBees)
         setLoadCount(tempLoadCount)
         setLoading(false)
@@ -224,12 +234,14 @@ const BeeHive = () => {
     console.log('clicked', tokenId)
     bcityContract.methods.collectHoney(tokenId).send({
       from: currentAccount,
-      gas: 2100000
+      gas: 210000
     })
     .then(res => {
       console.log('collect result', res)
+      toast.success('You collect honey successfully')
     })
     .catch(err => {
+      console.log(err)
       toast.error('Collecting failed')
     })
   }
@@ -272,7 +284,7 @@ const BeeHive = () => {
                 </div>
               ) :
                 currentAccount == '' ?
-                <MetamaskConnect type='black-btn btn px-4 h4 py-2' handleConnect={loadAccountData} handleDisconnect={loadAccountData}/> :
+                <MetamaskConnect type='black-btn btn px-4 h4 py-2' handleConnect={loadAccountData} handleDisconnect={loadAccountData} /> :
                 loading ?
                 <></> :
                 <></>

@@ -8,7 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { CHAIN_ID, NETWORKS } from '../../config';
 
 toast.configure()
-function MetamaskConnect({type, handleConnect, handleDisconnect}) {
+function MetamaskConnect(props) {
     const [currentAccount, setCurrentAccount] = useState('')
     const [isLogged, setIsLogged] = useState(false)
     const [isConnecting, setIsConnecting] = useState(false)
@@ -33,13 +33,13 @@ function MetamaskConnect({type, handleConnect, handleDisconnect}) {
     const connected = (account) => {
         setCurrentAccount(account)
         setIsLogged(true)
-        handleConnect()
+        props.handleConnect()
     }
 
     const disconnected = () => {
         setIsLogged(false)
         setCurrentAccount('')
-        handleDisconnect()
+        props.handleDisconnect()
     }
 
     const ConnectWallet = async () => {
@@ -105,22 +105,28 @@ function MetamaskConnect({type, handleConnect, handleDisconnect}) {
             .then((res) => {
                 const chainId = res.toString(16)
                 if (accounts.length === 0 || '0x' + chainId !== CHAIN_ID) {
-                    disconnected()
+                    // disconnected()
+                    setIsLogged(false)
+                    setCurrentAccount('')
+                    props.handleDisconnect()
                 } else {
-                    connected(accounts[0])
-                    var balance = web3.eth.getBalance(accounts[0])
-                    balance.then( result => {
-                        balance = web3.utils.fromWei(result)
-                        balance = parseFloat(balance)
-                        setBalance(balance)
-                    })
+                    setCurrentAccount(accounts[0])
+                    setIsLogged(true)
+                    props.handleConnect()
+                    // connected(accounts[0])
+                    // var balance = web3.eth.getBalance(accounts[0])
+                    // balance.then( result => {
+                    //     balance = web3.utils.fromWei(result)
+                    //     balance = parseFloat(balance)
+                    //     setBalance(balance)
+                    // })
                 }
             });
         }
     }
 
 
-    useEffect( () => {
+    useEffect(async () => {
         window.onbeforeunload = function() { return "Prevent reload" }
         if (window.ethereum !== undefined) {
             window.ethereum.on('accountsChanged', handleAccountsChanged);
@@ -211,7 +217,7 @@ function MetamaskConnect({type, handleConnect, handleDisconnect}) {
     return (
         <>
             {/* <Chain chainId={currentChainID} />{' '} */}
-            <button id="connect" onClick={connect} disabled={isLogged} className={type}>
+            <button id="connect" onClick={connect} disabled={isLogged} className={props.type}>
             {/* <button id="connect" onClick={connect} disabled={isLogged} className='btn btn-sm text-warning mx-3'> */}
                 { isConnecting && <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true"/>}
                 &nbsp;{isLogged ? shortAddr() : "Connect Wallet"}

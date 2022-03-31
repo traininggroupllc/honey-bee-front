@@ -248,7 +248,7 @@ const Landing = () => {
                     { isMinting && <Spinner as='span' animation='border' size='sm' role='status' aria-hidden='true' style={{padding: '6px'}}/>}
                     &nbsp;Mint
                     </button> :
-                    <MetamaskConnect type='black-btn btn px-4 h4 py-2' handleConnect={loadAccountData} handleDisconnect={loadAccountData}/>
+                    <MetamaskConnect type='black-btn btn px-4 h4 py-2' handleConnect={loadAccountData} handleDisconnect={loadAccountData} />
                 }
               </div>
             </div>
