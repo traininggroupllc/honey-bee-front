@@ -84,6 +84,7 @@ const BeeHive = () => {
   const [bees, setBees] = React.useState([])
   const [loading, setLoading] = React.useState(false)
   const [currentAccount, setCurrentAccount] = React.useState('')
+  const [collectingId, setCollectingId] = React.useState('')
   const [loadCount, setLoadCount] = React.useState(0)
   const [balance, setBalance] = React.useState(0)
 
@@ -92,6 +93,8 @@ const BeeHive = () => {
   }, [currentAccount])
 
   const loadAccountData = async () => {
+    tempLoadCount = 0
+    tempBalance = 0
     if (Web3.givenProvider !== null) {
       const web3 = new Web3(Web3.givenProvider)
       const accounts = await web3.eth.getAccounts()
@@ -102,7 +105,6 @@ const BeeHive = () => {
           setCurrentAccount('')
         } else {
           setCurrentAccount(accounts[0])
-          setLoading(true)
           getBees()
         }
       });
@@ -123,6 +125,11 @@ const BeeHive = () => {
       .then(res => {
         setBalance(res)
         tempBalance = res
+        if (res == 0 || tempBalance == 0 && tempLoadCount == 0) {
+          setLoading(false)
+        } else {
+          setLoading(true)
+        }
         for (var i = 0; i < res; i++) {
           getTokenByIndex(i)
         }
@@ -172,7 +179,7 @@ const BeeHive = () => {
           break;
       }
       const lastCollect = parseInt(res.honeyCollectedLast)
-      const date = new Date();
+      const date = new Date()
       const seconds = date.getTime() / 1000;
       const diff = parseInt(seconds) - lastCollect;
       const bee = {
@@ -232,15 +239,19 @@ const BeeHive = () => {
 
   const collectHoney = (tokenId) => {
     console.log('clicked', tokenId)
+    setCollectingId(tokenId)
     bcityContract.methods.collectHoney(tokenId).send({
       from: currentAccount,
       gas: 210000
     })
     .then(res => {
+      setCollectingId('')
       console.log('collect result', res)
       toast.success('You collect honey successfully')
+      getBees()
     })
     .catch(err => {
+      setCollectingId('')
       console.log(err)
       toast.error('Collecting failed')
     })
@@ -279,15 +290,15 @@ const BeeHive = () => {
                 <div key={index} className='d-inline-block text-center p-1 pb-3'>
                   <img alt='SETIMAGE' src={item.image} className='img-fluid' />
                   <div>{item.name}</div>
-                  <div><TimerCounter time={item.lastCollect}/></div>
-                  <BeeStatusButton time={item.lastCollect} handleClicked={ (tokenId) => collectHoney(tokenId)} beeId={item.tokenId}/>
+                  <div><TimerCounter time={item.lastCollect} tokenId={item.tokenId}/></div>
+                  <BeeStatusButton time={item.lastCollect} handleClicked={ (tokenId) => collectHoney(tokenId)} beeId={item.tokenId} isCollecting={collectingId == item.tokenId}/>
                 </div>
               ) :
                 currentAccount == '' ?
-                <MetamaskConnect type='black-btn btn px-4 h4 py-2' handleConnect={loadAccountData} handleDisconnect={loadAccountData} /> :
+                <MetamaskConnect size='lg' type='black-btn btn px-4 h4 py-2' handleConnect={loadAccountData} handleDisconnect={loadAccountData} /> :
                 loading ?
                 <></> :
-                <></>
+                <>No bees</>
             }
           </div>
         </div>

@@ -75,6 +75,17 @@ const HoneyJar = () => {
     }
   }
 
+  const getAccountMatic = (address) => {
+    var balance = web3.eth.getBalance(address)
+    balance.then( result => {
+      balance = web3.utils.fromWei(result)
+      balance = parseFloat(balance).toFixed(4)
+      console.log('balance', balance)
+      setMaticBalance(balance)
+      // setMatic(balance)
+    })
+  }
+
   const chainChanged = (_chainId) => {
     console.log('here', _chainId);
     loadAccountData()
@@ -168,6 +179,7 @@ const HoneyJar = () => {
           setIsSwap(false)
           toast.success('You bought Honey bee successfully')
           getHnybBalance(currentAccount)
+          getAccountMatic(currentAccount)
         })
         .catch(err => {
           setIsSwap(false)
@@ -309,10 +321,10 @@ const HoneyJar = () => {
                 { 
                   currentAccount != '' ?
                     <button className='btn black-btn px-5' onClick={swap}>
-                    { isSwap && <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true"/>}
+                    { isSwap && <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" style={{padding: '0.4rem'}}/>}
                     &nbsp;Swap
                     </button> :
-                    <MetamaskConnect type='btn black-btn px-5' handleConnect={loadAccountData} handleDisconnect={loadAccountData}/>
+                    <MetamaskConnect size='sm' type='btn black-btn px-5' handleConnect={loadAccountData} handleDisconnect={loadAccountData}/>
                 }
               </div>
             </div>

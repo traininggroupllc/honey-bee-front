@@ -254,3 +254,9 @@ input[type=number] {
 .btn-max {
   cursor: pointer;
 }
+
+.collect-spin {
+  padding: 0.4rem;
+  width: 1rem !important;
+  height: 1rem !important;
+}

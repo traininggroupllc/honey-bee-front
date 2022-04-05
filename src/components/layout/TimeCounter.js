@@ -12,7 +12,9 @@ const TimeCounter = (props) => {
     }, []);
 
     return (
+        (seconds > 0) ?
         <>{secondsToHms(seconds)}</>
+        : <>Cooling down...</>
     )
 }
 

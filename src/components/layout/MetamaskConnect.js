@@ -219,7 +219,7 @@ function MetamaskConnect(props) {
             {/* <Chain chainId={currentChainID} />{' '} */}
             <button id="connect" onClick={connect} disabled={isLogged} className={props.type}>
             {/* <button id="connect" onClick={connect} disabled={isLogged} className='btn btn-sm text-warning mx-3'> */}
-                { isConnecting && <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true"/>}
+                { isConnecting && <Spinner as="span" animation="border" size={props.size} role="status" aria-hidden="true" />}
                 &nbsp;{isLogged ? shortAddr() : "Connect Wallet"}
             </button>{' '}
             {/* <button onClick={disconnect} style={{visibility: isLogged ? "visible" : "hidden"}} className='btn btn-sm text-warning mx-3'>X</button> */}

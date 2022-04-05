@@ -195,8 +195,8 @@ const Landing = () => {
         bcityContract.methods.
         buy(mintAmount).send({
           from: currentAccount,
-          value: mintAmount * NFT_PRICE * 1000000000000000000,
-          gas: 2100000
+          value: Math.ceil(mintAmount * NFT_PRICE * 1000000000000000000),
+          // gas: 2500000
         })
         .once("error", (err) => {
           console.log(err)
@@ -245,10 +245,11 @@ const Landing = () => {
                 { 
                   currentAccount != '' ?
                     <button onClick={mint} className='black-btn btn px-4 h4 py-2'>
-                    { isMinting && <Spinner as='span' animation='border' size='sm' role='status' aria-hidden='true' style={{padding: '6px'}}/>}
+                    { isMinting && 
+                      <Spinner as='span' animation='border' size='lg' role='status' aria-hidden='true'/>}
                     &nbsp;Mint
                     </button> :
-                    <MetamaskConnect type='black-btn btn px-4 h4 py-2' handleConnect={loadAccountData} handleDisconnect={loadAccountData} />
+                    <MetamaskConnect size='lg' type='black-btn btn px-4 h4 py-2' handleConnect={loadAccountData} handleDisconnect={loadAccountData} />
                 }
               </div>
             </div>
