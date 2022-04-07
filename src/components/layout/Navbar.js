@@ -7,6 +7,14 @@ import MetamaskConnect from './MetamaskConnect'
 // import WalletConnect from '../WalletConnect/WalletConnect'
 
 function Navbar() {
+  const connected = () => {
+
+  }
+
+  const disconnected = () => {
+    
+  }
+
   return (
     <div className='top-navbar'>
       <div className='bg-top'>
@@ -34,7 +42,7 @@ function Navbar() {
               <Link to='/metamorphosis' className='mx-3'>Metamorphosis</Link>
               <Link to='/tokenomics' className='mx-3'>Tokenomics</Link>
               <Link to='/roadmap' className='mx-3'>Roadmap</Link>
-              <MetamaskConnect />
+              <MetamaskConnect size='sm' type='btn btn-sm text-warning mx-3' handleConnect={connected} handleDisconnect={disconnected}/>
             </div>
             <div className='mobile-nav'>
               <div className='dropdown'>
@@ -49,7 +57,7 @@ function Navbar() {
                   <p className="dropdown-item"><Link to='/tokenomics' className='mx-2'>Tokenomics</Link></p>
                   <p className="dropdown-item"><Link to='/roadmap' className='mx-2'>Roadmap</Link></p>
                   <p className="dropdown-item">
-                    <MetamaskConnect />
+                    <MetamaskConnect size='sm' type='btn btn-sm text-warning mx-3' handleConnect={connected} handleDisconnect={disconnected}/>
                   </p>
                 </div>
               </div>

@@ -1,4 +1,8 @@
 import React from 'react'
+import Web3 from 'web3'
+import { Spinner } from 'react-bootstrap'
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import FAQ from './FAQ'
 import minusButton from '../../img/minus-button.png'
 import plusButton from '../../img/plus-button.png'
@@ -20,6 +24,17 @@ import digit7 from '../../img/digit7.png'
 import digit8 from '../../img/digit8.png'
 import digit9 from '../../img/digit9.png'
 import landingBeeBG from '../../img/landing-bee-bg.png'
+import {
+  // HNYB_CONTRACT_ADDRESS,
+  // HNYB_CONTRACT_ABI,
+  // HONEYBANK_CONTRACT_ADDRESS,
+  // HONEYBANK_CONTRACT_ABI,
+  BCITY_CONTRACT_ADDRESS,
+  BCITY_CONTRACT_ABI,
+  NFT_PRICE,
+  CHAIN_ID
+} from '../../config'
+import MetamaskConnect from './MetamaskConnect';
 
 const bees = [
   {
@@ -117,19 +132,26 @@ const Roadmap = [
 ]
 
 var counter = 0
+toast.configure()
 
 const Landing = () => {
-
+  // toast.configure()
   const [currentImage, setCurrentImage] = React.useState(bees[0].image)
   const [mintAmount, setMintAmount] = React.useState(1)
-  const nftPrice = 255
+  const [balance, setBalance] = React.useState(0)
+  const [currentAccount, setCurrentAccount] = React.useState('')
+  const [isMinting, setIsMinting] = React.useState(false)
+  
+  const web3 = new Web3(Web3.givenProvider)
+  const bcityContract = new web3.eth.Contract(BCITY_CONTRACT_ABI, BCITY_CONTRACT_ADDRESS)
 
-  React.useEffect(() => {
+  React.useEffect( async () => {
     setInterval(async function () {
       counter++
       counter = counter % 7
       await setCurrentImage(bees[counter].image)
     }, 500)
+    loadAccountData()
   }, [])
 
   const updateMintAmount = (offset) => {
@@ -137,6 +159,59 @@ const Landing = () => {
       setMintAmount(mintAmount + offset)
     } else {
       setMintAmount(1)
+    }
+  }
+
+  const loadAccountData = async () => {
+    if (Web3.givenProvider !== null) {
+      const web3 = new Web3(Web3.givenProvider)
+      const accounts = await web3.eth.getAccounts()
+      web3.eth.net.getId()
+      .then((res) => {
+        const chainId = res.toString(16)
+        if (accounts.length === 0 || '0x' + chainId !== CHAIN_ID) {
+          setCurrentAccount('')
+        } else {
+          var balance = web3.eth.getBalance(accounts[0])
+          balance.then( result => {
+            balance = web3.utils.fromWei(result)
+            balance = parseFloat(balance)
+            setBalance(balance)
+            setCurrentAccount(accounts[0])
+          })
+        }
+      });
+    }
+  }
+
+  const mint = async () => {
+    if (currentAccount === '') {
+      toast.warning('Please connect to metamask')
+    } else {
+      if (balance < mintAmount * NFT_PRICE) {
+        toast.warning('Balance is not enough')
+      } else {
+        setIsMinting(true)
+        bcityContract.methods.
+        buy(mintAmount).send({
+          from: currentAccount,
+          value: Math.ceil(mintAmount * NFT_PRICE * 1000000000000000000),
+          // gas: 2500000
+        })
+        .once("error", (err) => {
+          console.log(err)
+          setIsMinting(false)
+          if (err.code === 4001) {
+            toast.error('You canceled confirmation') 
+          } else {
+            toast.error('Minting failed.') 
+          }
+        })
+        .then(res => {
+          setIsMinting(false)
+          toast.success('Successfully minted!')
+        })
+      }
     }
   }
 
@@ -164,9 +239,19 @@ const Landing = () => {
             </div>
             <div className='text-center bg-yellow mint-box p-3'>
               <div className='h4'>Mint {mintAmount} Honey Bee NFT.</div>
-              <div className='h4'>{nftPrice} MATIC Each.</div>
-              <div className='h3 font-weight-bold py-2'>Total: {mintAmount * nftPrice} MATIC</div>
-              <div><button className='black-btn btn px-4 h4 py-2'>Mint</button></div>
+              <div className='h4'>{NFT_PRICE} MATIC Each.</div>
+              <div className='h3 font-weight-bold py-2'>Total: {mintAmount * NFT_PRICE} MATIC</div>
+              <div>
+                { 
+                  currentAccount != '' ?
+                    <button onClick={mint} className='black-btn btn px-4 h4 py-2'>
+                    { isMinting && 
+                      <Spinner as='span' animation='border' size='lg' role='status' aria-hidden='true'/>}
+                    &nbsp;Mint
+                    </button> :
+                    <MetamaskConnect size='lg' type='black-btn btn px-4 h4 py-2' handleConnect={loadAccountData} handleDisconnect={loadAccountData} />
+                }
+              </div>
             </div>
           </div>
           <div className='col-lg-4'></div>

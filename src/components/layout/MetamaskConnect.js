@@ -1,111 +1,141 @@
 import React from 'react'
 import Web3 from 'web3'
+import { Spinner } from 'react-bootstrap'
 import detectEthereumProvider from '@metamask/detect-provider';
 import { useEffect, useState } from 'react'
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { CHAIN_ID, NETWORKS } from '../../config';
 
-function MetamaskConnect() {
-    const networks = {
-        'polygon': {
-            chainId: '0x89',
-            chainName: 'Polygon Mainnet',
-            nativeCurrency: {
-                name: 'MATIC',
-                symbol: 'MATIC',
-                decimals: 18
-            },
-            rpcUrls: ['https://polygon-rpc.com/'],
-            blockExplorerUrls: ['https://polygonscan.com/']
-        }
-    };
-
+toast.configure()
+function MetamaskConnect(props) {
     const [currentAccount, setCurrentAccount] = useState('')
     const [isLogged, setIsLogged] = useState(false)
+    const [isConnecting, setIsConnecting] = useState(false)
+    const [balance, setBalance] = useState(0)
     const [currentChainID, setCurrentChainID] = useState(-1)
 
     const connect = async () => {
         //Detect Provider
+        setIsConnecting(true)
         const provider = await detectEthereumProvider()
-        console.log('provider', provider)
         // const web3 = new Web3(provider)
 
         if(!provider || provider == null) {
-            alert('Please install MetaMask!')
+            setIsConnecting(false)
+            alert('Please install metamask')
             window.open('https://metamask.io/', '_blank');
-            // setMessage(messages => [...messages, {head : "Wallet not found", body: `Please install MetaMask!`, variant: 'warning'}])
         } else {
             const address = await ConnectWallet()
-            if (address)
-                setMessage(messages =>[...messages, {head : "User Login", body: `addres: ${address}`, variant: 'success'}])
         }
     }
 
+    const connected = (account) => {
+        setCurrentAccount(account)
+        setIsLogged(true)
+        props.handleConnect()
+    }
+
+    const disconnected = () => {
+        setIsLogged(false)
+        setCurrentAccount('')
+        props.handleDisconnect()
+    }
+
     const ConnectWallet = async () => {
-        console.log("Try Connect");
+        // console.log("Try Connect");
         try {
             await window.ethereum.enable();
 
             const id = await window.ethereum.request({
                 method: 'wallet_switchEthereumChain',
-                params: [{ chainId: '0x89' }], // chainId must be in hexadecimal numbers
+                // params: [{ chainId: '0x89' }], // chainId must be in hexadecimal numbers
+                params: [{ chainId: CHAIN_ID }], // Test net
             });
 
             setCurrentChainID(() => parseInt(id, 16))
 
             const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
-                setIsLogged(true)
-                setCurrentAccount(accounts[0])
+                connected(accounts[0])
+                setIsConnecting(false)
                 return accounts[0]
             } catch(err) {
             if (err.code === 4001) {
+                setIsConnecting(false)
                 console.log('Please connect to MetaMask.')
-                // setMessage(messages =>[...messages, {head : "User Rejected Request", body: 'Please connect to MetaMask.', variant: 'info'}])
+                toast.info('Please connect to MetaMask.')
             } else if(err.code === -32002) {
+                // console.log('Please unlock MetaMask.')
+                setIsConnecting(false)
                 console.log('Please unlock MetaMask.')
-                alert('Please unlock MetaMask.')
-                // setMessage(messages =>[...messages, {head : "User Request Pending", body: 'Please unlock MetaMask and try agin.', variant: 'info'}])
+                toast.info('Please unlock MetaMask.')
             } else if(err.code === 4902 || err.code === -32603) {
-                addNetwork("polygon");
+                addNetwork("polygon_test");
             } else {
                 console.error(err);
-                setMessage(messages =>[...messages, {head : "Error", body: err.message, variant: 'info'}])
             }
         }
     }
 
     const handleAccountsChanged = (accounts) => {
-        console.log('handleAccountsChanged');
+        // console.log('handleAccountsChanged');
         //if(!isLogged) return
         if (accounts.length === 0) {
-            setIsLogged(false)
-            setCurrentAccount('')
+            disconnected()
         } else if (accounts[0] !== currentAccount) {
-            console.log(accounts[0])
-            console.log(messages);
-            setCurrentAccount(() => accounts[0])
-            setMessage(messages => [...messages, {head : "Account Changed", body: `addres: ${accounts[0]}`, variant: 'warning'}])
+            connected(accounts[0])
         }
     }
 
     const chainChanged = (_chainId) => {
-        console.log('here', _chainId);
         setCurrentChainID(() => parseInt(_chainId, 16))
+        if (_chainId != CHAIN_ID) {
+            disconnect()
+        }
+        loadAccountData()
         //window.location.reload()
         // connect()
     }
 
+    const loadAccountData = async () => {
+        if (Web3.givenProvider !== null) {
+            const web3 = new Web3(Web3.givenProvider)
+            const accounts = await web3.eth.getAccounts()
+            web3.eth.net.getId()
+            .then((res) => {
+                const chainId = res.toString(16)
+                if (accounts.length === 0 || '0x' + chainId !== CHAIN_ID) {
+                    // disconnected()
+                    setIsLogged(false)
+                    setCurrentAccount('')
+                    props.handleDisconnect()
+                } else {
+                    setCurrentAccount(accounts[0])
+                    setIsLogged(true)
+                    props.handleConnect()
+                    // connected(accounts[0])
+                    // var balance = web3.eth.getBalance(accounts[0])
+                    // balance.then( result => {
+                    //     balance = web3.utils.fromWei(result)
+                    //     balance = parseFloat(balance)
+                    //     setBalance(balance)
+                    // })
+                }
+            });
+        }
+    }
 
-    useEffect(() => {
+
+    useEffect(async () => {
         window.onbeforeunload = function() { return "Prevent reload" }
-        console.log('ethereum', window.ethereum);
         if (window.ethereum !== undefined) {
             window.ethereum.on('accountsChanged', handleAccountsChanged);
             window.ethereum.on('chainChanged', chainChanged);
         }
-    }, []);
+        loadAccountData()
+    }, [currentAccount]);
 
-
-
-    const disconnect = async () => {
+    const disconnect = () => {
         setIsLogged(false)
         setCurrentAccount('')
     }
@@ -115,14 +145,17 @@ function MetamaskConnect() {
     }
 
     const addNetwork = (network) => {
-        const params = [networks[network]];
-        console.log(params);
+        const params = [NETWORKS[network]];
         window.ethereum.request({ method: 'wallet_addEthereumChain', params })
-        .then(() => console.log('Success'))
-        .catch((error) => console.log("Error", error.message))
+        .then(() => {
+            console.log('Success')
+            setIsConnecting(false)
+        })
+        .catch((error) => {
+            console.log("Error", error.message)
+            setIsConnecting(false)
+        })
     }
-
-    const [messages, setMessage] = useState([])
 
     // const Chain = (props) => {
     //     const chainId = props.chainId
@@ -181,13 +214,17 @@ function MetamaskConnect() {
     //     )
     // }
 
-  return (
-      <>
-        {/* <Chain chainId={currentChainID} />{' '} */}
-        <button id="connect" onClick={connect} disabled={isLogged} className='btn btn-sm text-warning mx-3'>{isLogged ? shortAddr() : "Connect Wallet"}</button>{' '}
-        {/* <button onClick={disconnect} style={{visibility: isLogged ? "visible" : "hidden"}} className='btn btn-sm text-warning mx-3'>X</button> */}
-      </>
-  )
+    return (
+        <>
+            {/* <Chain chainId={currentChainID} />{' '} */}
+            <button id="connect" onClick={connect} disabled={isLogged} className={props.type}>
+            {/* <button id="connect" onClick={connect} disabled={isLogged} className='btn btn-sm text-warning mx-3'> */}
+                { isConnecting && <Spinner as="span" animation="border" size={props.size} role="status" aria-hidden="true" />}
+                &nbsp;{isLogged ? shortAddr() : "Connect Wallet"}
+            </button>{' '}
+            {/* <button onClick={disconnect} style={{visibility: isLogged ? "visible" : "hidden"}} className='btn btn-sm text-warning mx-3'>X</button> */}
+        </>
+    )
 }
 
 export default MetamaskConnect
