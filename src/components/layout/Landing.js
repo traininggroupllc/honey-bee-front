@@ -196,7 +196,7 @@ const Landing = () => {
         buy(mintAmount).send({
           from: currentAccount,
           value: Math.ceil(mintAmount * NFT_PRICE * 1000000000000000000),
-          // gas: 2500000
+          gas: 2100000
         })
         .once("error", (err) => {
           console.log(err)

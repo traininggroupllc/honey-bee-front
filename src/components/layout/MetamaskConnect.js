@@ -70,7 +70,7 @@ function MetamaskConnect(props) {
                 console.log('Please unlock MetaMask.')
                 toast.info('Please unlock MetaMask.')
             } else if(err.code === 4902 || err.code === -32603) {
-                addNetwork("polygon_test");
+                addNetwork("polygon");
             } else {
                 console.error(err);
             }

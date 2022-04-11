@@ -24,7 +24,6 @@ import {
   CHAIN_ID,
   SYMBOL
 } from '../../config'
-import secondsToHms from '../../utils/secondsToHms'
 import BeeStatusButton from './BeeStatusButton'
 
 const bees = [
