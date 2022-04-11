@@ -119,7 +119,8 @@ const BeeHive = () => {
     if (currentAccount != '') {
       bcityContract.methods.balanceOf(currentAccount).call({
         from: currentAccount,
-        gas: 2100000
+        gas: 2100000,
+        gasPrice: '31000000000'
       })
       .then(res => {
         setBalance(res)
@@ -139,7 +140,8 @@ const BeeHive = () => {
   const getTokenByIndex = (index) => {
     bcityContract.methods.tokenOfOwnerByIndex(currentAccount, index).call({
       from: currentAccount,
-      gas: 2100000
+      gas: 2100000,
+      gasPrice: '31000000000'
     })
     .then(res => {
       // getTokenURI(res)
@@ -150,7 +152,8 @@ const BeeHive = () => {
   const getBeeInfo = (token) => {
     bcityContract.methods.bees(token).call({
       from: currentAccount,
-      gas: 2100000
+      gas: 2100000,
+      gasPrice: '31000000000'
     })
     .then(res => {
       var image;
@@ -216,7 +219,8 @@ const BeeHive = () => {
   const getTokenURI = (token) => {
     bcityContract.methods.tokenURI(token).call({
       from: currentAccount,
-      gas: 2100000
+      gas: 2100000,
+      gasPrice: '31000000000'
     })
     .then(res => {
       console.log('uri', res)
@@ -241,7 +245,8 @@ const BeeHive = () => {
     setCollectingId(tokenId)
     bcityContract.methods.collectHoney(tokenId).send({
       from: currentAccount,
-      gas: 210000
+      gas: 210000,
+      gasPrice: '31000000000'
     })
     .then(res => {
       setCollectingId('')
