@@ -131,7 +131,7 @@ const HoneyJar = () => {
     honeyBankContract.methods.HNYbBalanceOfUser().call({
       from: address,
       gas: 2100000,
-      gasPrice: '31000000000'
+      gasPrice: '32000000000'
     })
     .then(res => {
       console.log('user hnyb balance', web3.utils.fromWei(res))
@@ -143,7 +143,7 @@ const HoneyJar = () => {
     honeyBankContract.methods.MATICBalance().call({
       from: address,
       gas: 2100000,
-      gasPrice: '31000000000'
+      gasPrice: '32000000000'
     })
     .then(res => {
       console.log('bank matic balance', web3.utils.fromWei(res))
@@ -207,14 +207,14 @@ const HoneyJar = () => {
         hnybContract.methods.approve(HONEYBANK_CONTRACT_ADDRESS, web3.utils.toWei(honey)).send({
           from: currentAccount,
           gas: 2100000,
-          gasPrice: '31000000000'
+          gasPrice: '32000000000'
         })
         .then(res => {
           if (res) {
             honeyBankContract.methods.sell(web3.utils.toWei(honey)).send({
               from: currentAccount,
               gas: 2100000,
-              gasPrice: '31000000000'
+              gasPrice: '32000000000'
             })
             .then(res => {
               setIsSwap(false)
