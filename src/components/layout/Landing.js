@@ -152,6 +152,7 @@ const Landing = () => {
       await setCurrentImage(bees[counter].image)
     }, 500)
     loadAccountData()
+    // getTotalSupply()
   }, [])
 
   const updateMintAmount = (offset) => {
@@ -181,6 +182,18 @@ const Landing = () => {
           })
         }
       });
+    }
+  }
+
+  const getTotalSupply = async () => {
+    if (currentAccount != '') {
+      bcityContract.methods.totalSupply().call({
+        gas: 2100000,
+        gasPrice: '32000000000'
+      })
+      .then(res => {
+        console.log('total Supply', res)
+      })
     }
   }
 
