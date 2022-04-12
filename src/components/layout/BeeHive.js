@@ -13,6 +13,11 @@ import beeMiner from '../../img/bee-miner.png'
 import MetamaskConnect from './MetamaskConnect'
 import TimerCounter from './TimeCounter'
 import {
+  Multicall,
+  ContractCallResults,
+  ContractCallContext,
+} from 'ethereum-multicall';
+import {
   // HNYB_CONTRACT_ADDRESS,
   // HNYB_CONTRACT_ABI,
   // HONEYBANK_CONTRACT_ADDRESS,
@@ -83,7 +88,7 @@ const BeeHive = () => {
   const [bees, setBees] = React.useState([])
   const [loading, setLoading] = React.useState(false)
   const [currentAccount, setCurrentAccount] = React.useState('')
-  const [collectingId, setCollectingId] = React.useState('')
+  const [collectingId, setCollectingId] = React.useState(-1)
   const [loadCount, setLoadCount] = React.useState(0)
   const [balance, setBalance] = React.useState(0)
 
@@ -130,10 +135,63 @@ const BeeHive = () => {
         } else {
           setLoading(true)
         }
-        for (var i = 0; i < res; i++) {
-          getTokenByIndex(i)
-        }
+        getTokens(res)
+        // for (var i = 0; i < res; i++) {
+        //   getTokenByIndex(i)
+        // }
       })
+    }
+  }
+
+  const getTokens = async (res) => {
+    let calls = []
+    for (var i = 0; i < res; i++) {
+      const callItem = {
+        reference: 'tokenOfOwnerByIndexCall', 
+        methodName: 'tokenOfOwnerByIndex', 
+        methodParameters: [currentAccount, i]
+      }
+      calls.push(callItem)
+    }
+    const web3 = new Web3(Web3.givenProvider);
+    const multicall = new Multicall({ web3Instance: web3, tryAggregate: true });
+
+    const contractCallContext: ContractCallContext[] = [
+        {
+            reference: 'bcityContract',
+            contractAddress: BCITY_CONTRACT_ADDRESS,
+            abi: BCITY_CONTRACT_ABI,
+            calls: calls
+        },
+    ];
+
+    const results: ContractCallResults = await multicall.call(contractCallContext);
+    const tokenIds = results.results.bcityContract.callsReturnContext;
+    calls = []
+    for (var j = 0 ; j < tokenIds.length; j++) {
+      const token = parseInt(tokenIds[j].returnValues[0].hex)
+      calls.push({
+        reference: 'beesCall', 
+        methodName: 'bees', 
+        methodParameters: [token]
+      })
+    }
+
+    const beesCallContext: ContractCallContext[] = [
+      {
+        reference: 'bcityContract',
+        contractAddress: BCITY_CONTRACT_ADDRESS,
+        abi: BCITY_CONTRACT_ABI,
+        calls: calls
+      },
+    ];
+
+    const beesCallResults: ContractCallResults = await multicall.call(beesCallContext);
+    const beesResult = beesCallResults.results.bcityContract.callsReturnContext
+
+    for (var j = 0 ; j < beesResult.length; j++) {
+      const tokenDetail = beesResult[j].returnValues
+      getBeeInfo(tokenDetail)
     }
   }
 
@@ -149,71 +207,68 @@ const BeeHive = () => {
     })
   }
 
-  const getBeeInfo = (token) => {
-    bcityContract.methods.bees(token).call({
-      from: currentAccount,
-      gas: 2100000,
-      gasPrice: '32000000000'
-    })
-    .then(res => {
-      var image;
-      switch(res.shape) {
-        case "0":
-          image = beeQueen;
-          break;
-        case "1":
-          image = beeKaren;
-          break;
-        case "2":
-          image = beeBuzzy;
-          break;
-        case "3":
-          image = beeTobi;
-          break;
-        case "4":
-          image = beeDemolition;
-          break;
-        case "5":
-          image = beeExcavator;
-          break;
-        default:
-          image = beeMiner;
-          break;
-      }
-      const lastCollect = parseInt(res.honeyCollectedLast)
-      const date = new Date()
-      const seconds = date.getTime() / 1000;
-      const diff = parseInt(seconds) - lastCollect;
-      const bee = {
-        image: image,
-        name: web3.utils.fromWei(res.honeyPerDay) + ' ' + SYMBOL,
-        tokenId: token,
-        lastCollect: lastCollect,
-        honeyPerDay: parseInt(web3.utils.fromWei(res.honeyPerDay))
-      }
-      tempBees.push(bee)
-      
-      if (tempLoadCount <= tempBalance - 1) {
-        tempLoadCount++
-        setLoadCount(tempLoadCount)
-      }
-      if (tempLoadCount == tempBalance) {
-        for (var j = 0; j < tempBees.length; j++){
-          for(var k = j + 1; k < tempBees.length; k++){
-            if (tempBees[j].honeyPerDay > tempBees[k].honeyPerDay) {
-              var temp = tempBees[j]
-              tempBees[j] = tempBees[k]
-              tempBees[k] = temp
-            }
+  const getBeeInfo = (res) => {
+    var image;
+    const shape = parseInt(res[0].hex)
+    const honeyPerDay = parseInt(res[1].hex)
+    const honeyCollectedLast = parseInt(res[2].hex)
+    const token = parseInt(res[3].hex)
+    switch(shape) {
+      case 0:
+        image = beeQueen;
+        break;
+      case 1:
+        image = beeKaren;
+        break;
+      case 2:
+        image = beeBuzzy;
+        break;
+      case 3:
+        image = beeTobi;
+        break;
+      case 4:
+        image = beeDemolition;
+        break;
+      case 5:
+        image = beeExcavator;
+        break;
+      default:
+        image = beeMiner;
+        break;
+    }
+    const lastCollect = parseInt(honeyCollectedLast)
+    const date = new Date()
+    const seconds = date.getTime() / 1000;
+    const diff = parseInt(seconds) - lastCollect;
+    const bee = {
+      image: image,
+      name: web3.utils.fromWei(honeyPerDay.toString()) + ' ' + SYMBOL,
+      tokenId: token,
+      lastCollect: lastCollect,
+      honeyPerDay: parseInt(web3.utils.fromWei(honeyPerDay.toString()))
+    }
+    tempBees.push(bee)
+    
+    if (tempLoadCount <= tempBalance - 1) {
+      tempLoadCount++
+      setLoadCount(tempLoadCount)
+    }
+    if (tempLoadCount == tempBalance) {
+      for (var j = 0; j < tempBees.length; j++){
+        for(var k = j + 1; k < tempBees.length; k++){
+          if (tempBees[j].honeyPerDay > tempBees[k].honeyPerDay) {
+            var temp = tempBees[j]
+            tempBees[j] = tempBees[k]
+            tempBees[k] = temp
           }
         }
-        setBees(tempBees)
-        setLoadCount(tempLoadCount)
-        setLoading(false)
-        tempLoadCount = 0
-        tempBalance = 0
       }
-    })
+      setBees(tempBees)
+      setLoadCount(tempLoadCount)
+      setLoading(false)
+      tempLoadCount = 0
+      tempBalance = 0
+    }
   }
 
   const getTokenURI = (token) => {
@@ -249,13 +304,13 @@ const BeeHive = () => {
       gasPrice: '32000000000'
     })
     .then(res => {
-      setCollectingId('')
+      setCollectingId(-1)
       console.log('collect result', res)
       toast.success('You collect honey successfully')
       getBees()
     })
     .catch(err => {
-      setCollectingId('')
+      setCollectingId(-1)
       console.log(err)
       toast.error('Collecting failed')
     })
