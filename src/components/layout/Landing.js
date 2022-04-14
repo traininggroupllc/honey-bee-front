@@ -141,18 +141,18 @@ const Landing = () => {
   const [balance, setBalance] = React.useState(0)
   const [currentAccount, setCurrentAccount] = React.useState('')
   const [isMinting, setIsMinting] = React.useState(false)
+  const [totalSupply, setTotalSupply] = React.useState(1)
   
   const web3 = new Web3(Web3.givenProvider)
   const bcityContract = new web3.eth.Contract(BCITY_CONTRACT_ABI, BCITY_CONTRACT_ADDRESS)
 
-  React.useEffect( async () => {
+  React.useEffect(() => {
     setInterval(async function () {
       counter++
       counter = counter % 7
       await setCurrentImage(bees[counter].image)
     }, 500)
     loadAccountData()
-    // getTotalSupply()
   }, [])
 
   const updateMintAmount = (offset) => {
@@ -185,14 +185,14 @@ const Landing = () => {
     }
   }
 
-  const getTotalSupply = async () => {
+  const getTotalSupply = () => {
     if (currentAccount != '') {
       bcityContract.methods.totalSupply().call({
         gas: 2100000,
         gasPrice: '32000000000'
       })
       .then(res => {
-        console.log('total Supply', res)
+        setTotalSupply(res)
       })
     }
   }
@@ -209,7 +209,7 @@ const Landing = () => {
         buy(mintAmount).send({
           from: currentAccount,
           value: Math.ceil(mintAmount * NFT_PRICE * 1000000000000000000),
-          gas: 500000 * mintAmount,
+          gas: 400000 * mintAmount,
           gasPrice: '32000000000'
         })
         .once("error", (err) => {
@@ -229,6 +229,8 @@ const Landing = () => {
     }
   }
 
+  getTotalSupply()
+
   return (
     <div className='landing'>
       <div className='landing-1 container-fluid'>
@@ -238,7 +240,7 @@ const Landing = () => {
             <div className='text-center bg-yellow mint-box'>
               <div className='h3 font-weight-bold'>SEASON 1</div>
               <div className='h4 font-weight-bold'>Mint Your Honey Bee!</div>
-              <div className='h0 font-weight-bold'>1 / 9,999</div>
+              <div className='h0 font-weight-bold'>{totalSupply} / 9,999</div>
             </div>
             <div className='d-flex align-items-center justify-content-between'>
               <div>

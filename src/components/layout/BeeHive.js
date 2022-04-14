@@ -166,32 +166,35 @@ const BeeHive = () => {
     ];
 
     const results: ContractCallResults = await multicall.call(contractCallContext);
-    const tokenIds = results.results.bcityContract.callsReturnContext;
-    calls = []
-    for (var j = 0 ; j < tokenIds.length; j++) {
-      const token = parseInt(tokenIds[j].returnValues[0].hex)
-      calls.push({
-        reference: 'beesCall', 
-        methodName: 'bees', 
-        methodParameters: [token]
-      })
-    }
-
-    const beesCallContext: ContractCallContext[] = [
-      {
-        reference: 'bcityContract',
-        contractAddress: BCITY_CONTRACT_ADDRESS,
-        abi: BCITY_CONTRACT_ABI,
-        calls: calls
-      },
-    ];
-
-    const beesCallResults: ContractCallResults = await multicall.call(beesCallContext);
-    const beesResult = beesCallResults.results.bcityContract.callsReturnContext
-
-    for (var j = 0 ; j < beesResult.length; j++) {
-      const tokenDetail = beesResult[j].returnValues
-      getBeeInfo(tokenDetail)
+    console.log(results.results)
+    if (results.results && results.results.bcityContract) {
+      const tokenIds = results.results.bcityContract.callsReturnContext;
+      calls = []
+      for (var j = 0 ; j < tokenIds.length; j++) {
+        const token = parseInt(tokenIds[j].returnValues[0].hex)
+        calls.push({
+          reference: 'beesCall', 
+          methodName: 'bees', 
+          methodParameters: [token]
+        })
+      }
+  
+      const beesCallContext: ContractCallContext[] = [
+        {
+          reference: 'bcityContract',
+          contractAddress: BCITY_CONTRACT_ADDRESS,
+          abi: BCITY_CONTRACT_ABI,
+          calls: calls
+        },
+      ];
+  
+      const beesCallResults: ContractCallResults = await multicall.call(beesCallContext);
+      const beesResult = beesCallResults.results.bcityContract.callsReturnContext
+  
+      for (var j = 0 ; j < beesResult.length; j++) {
+        const tokenDetail = beesResult[j].returnValues
+        getBeeInfo(tokenDetail)
+      }
     }
   }
 

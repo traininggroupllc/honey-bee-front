@@ -1,12 +1,12 @@
 // MAINNET ADDRESS
-export const HONEYBANK_CONTRACT_ADDRESS = '0x3a46324bC7A4C499d9f670021a7C4acaBb5C9f1F'
-export const HNYB_CONTRACT_ADDRESS = '0xE0907b6fba0E6dDBb6aE1b1D447697C55AA7Ac7E'
-export const BCITY_CONTRACT_ADDRESS = '0xC8594501dBD4053995E11681f6BC793a33BFCD57'
+export const HONEYBANK_CONTRACT_ADDRESS = '0x83401FaBb9a7CB39f89a26a013f51B197D72F318'
+export const HNYB_CONTRACT_ADDRESS = '0x5C0004Dab31AE74017C46c9F14cD3dd657979FBe'
+export const BCITY_CONTRACT_ADDRESS = '0x2cA5C457090D2C64183500DA564D8f3F0bd951fd'
 
 //testnet contract 
 // export const HONEYBANK_CONTRACT_ADDRESS = '0x6409E52534bf5242B0A4c5ebc10B4E6f526431Ac'
 // export const HNYB_CONTRACT_ADDRESS = '0xE401f093bAe2272F14dfCd13B04399FDf6Fd55e4'
-// export const BCITY_CONTRACT_ADDRESS = '0x9A5894898cC1Ef3D37A5872830587AB587Bc177b'
+// export const BCITY_CONTRACT_ADDRESS = '0xC9468676A716E8Ee704Fc57ed257772294E0CD90'
 
 
 export const HONEYBANK_CONTRACT_ABI = [
@@ -2013,7 +2013,7 @@ export const NETWORKS = {
             symbol: 'MATIC',
             decimals: 18
         },
-        rpcUrls: ['https://rpc-mainnet.maticvigil.com'],
+        rpcUrls: ['https://rpc-mainnet.matic.quiknode.pro'],
         blockExplorerUrls: ['https://polygonscan.com/']
     },
     'polygon_test': {
