@@ -161,6 +161,7 @@ body {
 
 .beehive {
   background: url('./img/beehive-bg.png') no-repeat center center/cover;
+  background-attachment: fixed;
 }
 
 @media (max-width: 769px) {

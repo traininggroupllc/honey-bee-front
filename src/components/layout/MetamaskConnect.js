@@ -70,7 +70,7 @@ function MetamaskConnect(props) {
                 console.log('Please unlock MetaMask.')
                 toast.info('Please unlock MetaMask.')
             } else if(err.code === 4902 || err.code === -32603) {
-                addNetwork("polygon_test");
+                addNetwork("polygon");
             } else {
                 console.error(err);
             }
@@ -133,9 +133,18 @@ function MetamaskConnect(props) {
             window.ethereum.on('chainChanged', chainChanged);
         }
         loadAccountData()
-    }, [currentAccount]);
+    }, []);
 
-    const disconnect = () => {
+    const disconnect = async () => {
+        // await window.ethereum.request({
+        //     method: "wallet_requestPermissions",
+        //     params: [
+        //       {
+        //         eth_accounts: {}
+        //       }
+        //     ]
+        // });
+
         setIsLogged(false)
         setCurrentAccount('')
     }
@@ -217,11 +226,20 @@ function MetamaskConnect(props) {
     return (
         <>
             {/* <Chain chainId={currentChainID} />{' '} */}
-            <button id="connect" onClick={connect} disabled={isLogged} className={props.type}>
-            {/* <button id="connect" onClick={connect} disabled={isLogged} className='btn btn-sm text-warning mx-3'> */}
+            {
+                isLogged ?
+                <button id="disconnect" onClick={disconnect} className={props.type}>
+                    &nbsp;{shortAddr()}
+                </button> :
+                <button id="connect" onClick={connect} className={props.type}>
+                    { isConnecting && <Spinner as="span" animation="border" size={props.size} role="status" aria-hidden="true" />}
+                    &nbsp;Connect Wallet
+                </button>
+            }
+            {/* <button id="connect" onClick={connect} disabled={isLogged} className={props.type}>
                 { isConnecting && <Spinner as="span" animation="border" size={props.size} role="status" aria-hidden="true" />}
                 &nbsp;{isLogged ? shortAddr() : "Connect Wallet"}
-            </button>{' '}
+            </button>{' '} */}
             {/* <button onClick={disconnect} style={{visibility: isLogged ? "visible" : "hidden"}} className='btn btn-sm text-warning mx-3'>X</button> */}
         </>
     )
