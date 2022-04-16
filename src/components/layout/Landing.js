@@ -186,15 +186,13 @@ const Landing = () => {
   }
 
   const getTotalSupply = () => {
-    if (currentAccount != '') {
-      bcityContract.methods.totalSupply().call({
-        gas: 2100000,
-        gasPrice: '32000000000'
-      })
-      .then(res => {
-        setTotalSupply(res)
-      })
-    }
+    bcityContract.methods.totalSupply().call({
+      gas: 2100000,
+      gasPrice: '32000000000'
+    })
+    .then(res => {
+      setTotalSupply(res)
+    })
   }
 
   const mint = async () => {
