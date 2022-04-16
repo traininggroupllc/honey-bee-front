@@ -130,7 +130,8 @@ const HoneyJar = () => {
   const getHnybBalance = (address) => {
     honeyBankContract.methods.HNYbBalanceOfUser().call({
       from: address,
-      gas: 2100000
+      gas: 2100000,
+      gasPrice: '32000000000'
     })
     .then(res => {
       console.log('user hnyb balance', web3.utils.fromWei(res))
@@ -141,7 +142,8 @@ const HoneyJar = () => {
   const getMaticBalance = (address) => {
     honeyBankContract.methods.MATICBalance().call({
       from: address,
-      gas: 2100000
+      gas: 2100000,
+      gasPrice: '32000000000'
     })
     .then(res => {
       console.log('bank matic balance', web3.utils.fromWei(res))
@@ -170,10 +172,12 @@ const HoneyJar = () => {
       toast.warning('Please connect to metamask')
     } else {
       if (matic > 0 && matic <= maticBalance) {
+        console.log(web3.utils.toWei(matic))
         honeyBankContract.methods.buy().send({
           from: currentAccount,
           value: web3.utils.toWei(matic),
-          gas: 2100000
+          gas: 2100000,
+          gasPrice: '33500000000'
         })
         .then(res => {
           setIsSwap(false)
@@ -182,6 +186,7 @@ const HoneyJar = () => {
           getAccountMatic(currentAccount)
         })
         .catch(err => {
+          console.log(err)
           setIsSwap(false)
           toast.error('Buy Token failed.')
         })
@@ -201,18 +206,21 @@ const HoneyJar = () => {
         // console.log('formated honey', hn)
         hnybContract.methods.approve(HONEYBANK_CONTRACT_ADDRESS, web3.utils.toWei(honey)).send({
           from: currentAccount,
-          gas: 2100000
+          gas: 2100000,
+          gasPrice: '32000000000'
         })
         .then(res => {
           if (res) {
             honeyBankContract.methods.sell(web3.utils.toWei(honey)).send({
               from: currentAccount,
-              gas: 2100000
+              gas: 2100000,
+              gasPrice: '32000000000'
             })
             .then(res => {
               setIsSwap(false)
               toast.success('You sold Honey bee successfully')
               getHnybBalance(currentAccount)
+              getAccountMatic(currentAccount)
             })
             .catch(err => {
               console.log('err', err);
