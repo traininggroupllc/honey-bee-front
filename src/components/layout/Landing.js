@@ -70,13 +70,13 @@ const bees = [
   {
     image: beeKaren,
     name: 'Karen Bee',
-    desciption: '20 Honey Per Day',
+    desciption: '24 Honey Per Day',
     category: 'Rare'
   },
   {
     image: beeQueen,
     name: 'Queen Bee',
-    desciption: '70 Honey Per Day',
+    desciption: '80 Honey Per Day',
     category: 'Epic'
   }
 ]
@@ -298,7 +298,7 @@ const Landing = () => {
           <div className='col-lg-6 text-center pb-5'>
             {bees.map((item, index) =>
               <div key={index} className='d-inline-block text-center p-1'>
-                <img alt='SETIMAGE' src={item.image} className='img-fluid' />
+                <img alt='SETIMAGE' src={item.image} className='img-fluid bee-image' />
                 <div className='font-weight-bold h6'>{item.name}</div>
                 <div>{item.desciption}</div>
                 <div className='text-success'>{item.category}</div>

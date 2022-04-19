@@ -350,7 +350,7 @@ const BeeHive = () => {
               bees.length > 0 && currentAccount != '' ? 
               bees.map((item, index) =>
                 <div key={index} className='d-inline-block text-center p-1 pb-3'>
-                  <img alt='SETIMAGE' src={item.image} className='img-fluid' />
+                  <img alt='SETIMAGE' src={item.image} className='img-fluid bee-image' />
                   <div>{item.name}</div>
                   <div><TimerCounter time={item.lastCollect} tokenId={item.tokenId}/></div>
                   <BeeStatusButton time={item.lastCollect} handleClicked={ (tokenId) => collectHoney(tokenId)} beeId={item.tokenId} isCollecting={collectingId == item.tokenId}/>

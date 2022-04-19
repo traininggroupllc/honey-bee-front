@@ -261,3 +261,7 @@ input[type=number] {
   width: 1rem !important;
   height: 1rem !important;
 }
+
+.bee-image {
+  width: 200px;
+}
